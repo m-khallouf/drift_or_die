@@ -6,24 +6,39 @@ class_name DriftCar
 ## Lateral grip is modelled directly on the velocity, which keeps the car
 ## predictable while still allowing long slides.
 
+signal crashed
+signal recovered
+
 @export var acceleration: float = 5.0
 @export var max_speed: float = 42.0
 @export var grip: float = 9.0
 @export var drift_grip: float = 1.4
 @export var steer_strength: float = 2.4
 @export var steer_response: float = 7.0
+@export var crash_duration: float = 2.0
+@export var blink_interval: float = 0.12
 
 var is_drifting: bool = false
 var speed_kmh: float = 0.0
 
 var _start_transform: Transform3D = Transform3D.IDENTITY
 
+var is_crashed: bool = false
+var _crash_time: float = 0.0
+
 
 func _ready() -> void:
 	_start_transform = global_transform
+	contact_monitor = true
+	max_contacts_reported = 4
+	body_entered.connect(_on_body_entered)
 
 
 func _physics_process(delta: float) -> void:
+	if is_crashed:
+		_update_crash(delta)
+		return
+	
 	var steer: float = _read_steer()
 	is_drifting = _read_drift()
 
@@ -74,6 +89,8 @@ func _read_drift() -> bool:
 
 
 func reset_to(spawn_transform: Transform3D) -> void:
+	is_crashed = false
+	_set_visuals(true)
 	global_transform = spawn_transform
 	linear_velocity = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
@@ -82,3 +99,37 @@ func reset_to(spawn_transform: Transform3D) -> void:
 
 func respawn() -> void:
 	reset_to(_start_transform)
+
+func _on_body_entered(body: Node) -> void:
+	if is_crashed or not body.is_in_group("wall"):
+		return
+	is_crashed = true
+	_crash_time = 0.0
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	crashed.emit()
+
+
+func _update_crash(delta: float) -> void:
+	_crash_time += delta
+	linear_velocity = Vector3(0.0, linear_velocity.y, 0.0)
+	angular_velocity = Vector3.ZERO
+	speed_kmh = 0.0
+	is_drifting = false
+	_set_visuals(int(_crash_time / blink_interval) % 2 == 0)
+	if _crash_time >= crash_duration:
+		is_crashed = false
+		_set_visuals(true)
+		recovered.emit()
+
+
+func _set_visuals(on: bool) -> void:
+	for child in get_children():
+		if child is MeshInstance3D:
+			child.visible = on
+
+
+func place_at(t: Transform3D) -> void:
+	global_transform = t
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
