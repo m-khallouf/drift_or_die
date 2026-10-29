@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://bashso134x4hk"]
+
+[ext_resource type="Script" uid="uid://8kjtm3ugrt15" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://hwdyuui10078" path="res://scripts/track_generator.gd" id="2_track"]
+[ext_resource type="Script" uid="uid://bu55fjeo0fvo2" path="res://scripts/terrain_generator.gd" id="3_terrain"]
+[ext_resource type="PackedScene" uid="uid://bt8wdh3ks3iv7" path="res://scenes/car.tscn" id="4_car"]
+[ext_resource type="Script" uid="uid://bf51ad2etcopl" path="res://scripts/chase_camera.gd" id="5_camera"]
+[ext_resource type="Script" uid="uid://cle4lsx6v82mj" path="res://scripts/hud.gd" id="6_hud"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_top_color = Color(0.18, 0.34, 0.62, 1)
+sky_horizon_color = Color(0.62, 0.72, 0.85, 1)
+ground_bottom_color = Color(0.16, 0.18, 0.16, 1)
+ground_horizon_color = Color(0.62, 0.72, 0.85, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 3
+ambient_light_energy = 0.8
+tonemap_mode = 2
+
+[node name="Main" type="Node3D" unique_id=195710091]
+script = ExtResource("1_game")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2108790275]
+environment = SubResource("Environment_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=595290496]
+transform = Transform3D(0.819152, 0.439385, -0.368688, 0, 0.642788, 0.766044, 0.573576, -0.627507, 0.526541, 0, 30, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Track" type="Node3D" parent="." unique_id=1450828198]
+script = ExtResource("2_track")
+
+[node name="Terrain" type="Node3D" parent="." unique_id=1344257638]
+script = ExtResource("3_terrain")
+
+[node name="Car" parent="." unique_id=1372373682 instance=ExtResource("4_car")]
+
+[node name="ChaseCamera" type="Camera3D" parent="." unique_id=828250178]
+current = true
+fov = 70.0
+script = ExtResource("5_camera")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1608562715]
+script = ExtResource("6_hud")
+
+[node name="SpeedLabel" type="Label" parent="HUD" unique_id=738457537]
+offset_left = 32.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 44
+text = "0 km/h"
+
+[node name="DriftLabel" type="Label" parent="HUD" unique_id=1239785133]
+offset_left = 32.0
+offset_top = 92.0
+offset_right = 320.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(1, 0.6, 0.1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 32
+text = "DRIFT!"
+
+[node name="ControlsLabel" type="Label" parent="HUD" unique_id=1201518228]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -48.0
+offset_right = 920.0
+offset_bottom = -16.0
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 0.85)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "A / D or Arrows: steer     Space: drift     R: restart"
