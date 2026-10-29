@@ -12,6 +12,7 @@ class_name TrackGenerator
 @export var samples_per_segment: int = 18
 @export var seed_value: int = 1337
 @export var road_height: float = 0.08
+@export var wall_height: float = 1.2
 
 var centerline: PackedVector3Array = PackedVector3Array()
 var tangents: PackedVector3Array = PackedVector3Array()
@@ -26,6 +27,7 @@ func generate() -> Dictionary:
 	_build_road()
 	_build_edge_lines()
 	_build_collision()
+	_build_walls()
 	start_transform = _make_start_transform()
 
 	return {
@@ -152,6 +154,61 @@ func _build_collision() -> void:
 	body.add_child(shape)
 	add_child(body)
 
+func _build_walls() -> void:
+	for side_offset in [half_width, -half_width]:
+		var mesh: ArrayMesh = _build_wall_mesh(side_offset)
+		mesh.surface_set_material(0, _wall_material())
+
+		var instance := MeshInstance3D.new()
+		instance.name = "WallMesh"
+		instance.mesh = mesh
+		add_child(instance)
+
+		var body := StaticBody3D.new()
+		body.name = "WallBody"
+		body.add_to_group("wall")
+		var shape := CollisionShape3D.new()
+		var trimesh: ConcavePolygonShape3D = mesh.create_trimesh_shape()
+		trimesh.backface_collision = true
+		shape.shape = trimesh
+		body.add_child(shape)
+		add_child(body)
+
+
+func _build_wall_mesh(offset: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n: int = centerline.size()
+
+	for i in n:
+		var side: Vector3 = tangents[i].cross(Vector3.UP).normalized()
+		var base: Vector3 = centerline[i] + side * offset
+		st.add_vertex(base + Vector3.UP * road_height)
+		st.add_vertex(base + Vector3.UP * (road_height + wall_height))
+
+	for i in n:
+		var next: int = (i + 1) % n
+		var a: int = i * 2
+		var b: int = a + 1
+		var c: int = next * 2
+		var d: int = c + 1
+		st.add_index(a)
+		st.add_index(b)
+		st.add_index(c)
+		st.add_index(b)
+		st.add_index(d)
+		st.add_index(c)
+
+	st.generate_normals()
+	return st.commit()
+
+
+func _wall_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.85, 0.2, 0.15)
+	mat.roughness = 0.8
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return mat
 
 func _make_start_transform() -> Transform3D:
 	var spawn: Vector3 = centerline[0] + Vector3.UP * 1.25
