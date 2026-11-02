@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://8kjtm3ugrt15" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="Script" uid="uid://hwdyuui10078" path="res://scripts/track_generator.gd" id="2_track"]
 [ext_resource type="Script" uid="uid://bu55fjeo0fvo2" path="res://scripts/terrain_generator.gd" id="3_terrain"]
-[ext_resource type="PackedScene" uid="uid://bt8wdh3ks3iv7" path="res://scenes/car.tscn" id="4_car"]
+[ext_resource type="PackedScene" uid="uid://rv4z8yo2n5iol" path="res://scenes/cat_kart.tscn" id="4_car"]
 [ext_resource type="Script" uid="uid://bf51ad2etcopl" path="res://scripts/chase_camera.gd" id="5_camera"]
 [ext_resource type="Script" uid="uid://cle4lsx6v82mj" path="res://scripts/hud.gd" id="6_hud"]
 
