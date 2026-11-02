@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cgijvq02fc0nj"]
+
+[ext_resource type="Script" uid="uid://b37ewqjp0t7kf" path="res://scripts/car.gd" id="1_car"]
+[ext_resource type="PackedScene" uid="uid://dtboqwd6vfj24" path="res://scenes/cat_kart.glb" id="2_model"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_cat_kart"]
+friction = 0.0
+
+[sub_resource type="BoxShape3D" id="BoxShape_cat_kart"]
+size = Vector3(1.8, 0.7, 4)
+
+[node name="CatKart" type="RigidBody3D"]
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+mass = 1000.0
+physics_material_override = SubResource("PhysicsMaterial_cat_kart")
+can_sleep = false
+continuous_cd = true
+script = ExtResource("1_car")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.35, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape_cat_kart")
