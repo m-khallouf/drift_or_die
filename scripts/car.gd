@@ -124,9 +124,14 @@ func _update_crash(delta: float) -> void:
 
 
 func _set_visuals(on: bool) -> void:
-	for child in get_children():
+	_set_visuals_recursive(self, on)
+
+
+func _set_visuals_recursive(node: Node, on: bool) -> void:
+	for child in node.get_children():
 		if child is MeshInstance3D:
 			child.visible = on
+		_set_visuals_recursive(child, on)
 
 
 func place_at(t: Transform3D) -> void:
